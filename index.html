@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spesial Untukmu ❤️</title>
+    <!-- Google Fonts untuk kesan romantis -->
+    <link href="https://googleapis.com" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #fff5f6;
+            --primary-color: #ff4d6d;
+            --secondary-color: #ff85a1;
+            --text-color: #4a3b32;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        /* Desain Card Romantis */
+        .container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(255, 77, 109, 0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            border: 1px solid rgba(255, 133, 161, 0.2);
+            transition: all 0.5s ease;
+            position: relative;
+            z-index: 10;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+        }
+
+        p {
+            font-size: 1.05rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            color: #6c5a55;
+        }
+
+        /* Gaya Tombol */
+        .btn-container {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.3s;
+            box-shadow: 0 4px 15px rgba(255, 77, 109, 0.3);
+        }
+
+        button:hover {
+            background-color: #ff3355;
+            transform: translateY(-2px);
+        }
+
+        /* Tombol 'Nggak' yang interaktif */
+        #btn-no {
+            background-color: #a8a29e;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        #btn-no:hover {
+            background-color: #78716c;
+        }
+
+        /* Section Konten Utama (Tersembunyi di awal) */
+        .main-content {
+            display: none;
+        }
+
+        .main-content h1 {
+            font-size: 2.5rem;
+            animation: heartbeat 1.2s infinite;
+        }
+
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            20% { transform: scale(1.05); }
+            40% { transform: scale(1); }
+            60% { transform: scale(1.07); }
+            80% { transform: scale(1); }
+            100% { transform: scale(1); }
+        }
+
+        /* Canvas untuk Efek Confetti Hati */
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- KONTEN 1: TEBAK-TEBAKAN PEMBUKA -->
+    <div class="container" id="quiz-box">
+        <h1>Tebak-tebakan Dulu Yuk! 💖</h1>
+        <p id="quiz-question">Kopi apa yang paling manis di dunia?</p>
+        <div class="btn-container">
+            <button onclick="checkAnswer(true)">Kopi Susu Caramel</button>
+            <button onclick="checkAnswer(false)">Kopi-nang kamu dengan bismillah</button>
+        </div>
+    </div>
+
+    <!-- KONTEN 2: PERTANYAAN INTI -->
+    <div class="container" id="love-box" style="display: none;">
+        <h1>Satu Pertanyaan Lagi... 🥺</h1>
+        <p>Kamu tahu nggak kalau hari ini aku makin sayang banget sama kamu?</p>
+        <div class="btn-container">
+            <button id="btn-yes" onclick="showSurprise()">Tahu Dong! ❤️</button>
+            <button id="btn-no" onmouseover="moveButton()" onclick="moveButton()">Nggak Tahu 😜</button>
+        </div>
+    </div>
+
+    <!-- KONTEN 3: HALAMAN UTAMA / KEJUTAN -->
+    <div class="container main-content" id="surprise-box">
+        <h1>I Love You! 💝</h1>
+        <p>Terima kasih ya sudah hadir dan jadi orang paling spesial di hidupku. Halaman ini dibuat khusus karena aku mau kamu tahu kalau cintaku ke kamu itu luas banget!</p>
+        <p style="font-style: italic; font-size: 0.95rem;">"Kamu adalah alasan di balik senyumku setiap hari."</p>
+    </div>
+
+    <script>
+        // Data sederhana untuk alur tebak-tebakan
+        let quizStep = 1;
+
+        function checkAnswer(isWrong) {
+            const questionElement = document.getElementById('quiz-question');
+            const container = document.getElementById('quiz-box');
+            
+            if(quizStep === 1) {
+                // Mengubah ke tebakan kedua apa pun pilihan pertamanya (biar romantis)
+                questionElement.innerText = "Salah! Yang bener itu... Kopi-nang kau dengan bismillah. Hahaha! \n\nOke, tebakan satu lagi: Kucing apa yang paling cantik?";
+                container.querySelectorAll('button')[0].innerText = "Kucing Anggora";
+                container.querySelectorAll('button')[1].innerText = "Kucing-ta kau selamanya";
+                quizStep = 2;
+            } else {
+                // Menuju ke pertanyaan inti
+                container.style.display = 'none';
+                document.getElementById('love-box').style.display = 'block';
+            }
+        }
+
+        // Membuat tombol 'Nggak' menghindar saat didekati/diklik
+        function moveButton() {
+            const btnNo = document.getElementById('btn-no');
+            // Menghitung posisi acak di dalam layar
+            const x = Math.random() * (window.innerWidth - btnNo.offsetWidth - 50);
+            const y = Math.random() * (window.innerHeight - btnNo.offsetHeight - 50);
+            
+            btnNo.style.position = 'fixed';
+            btnNo.style.left = x + 'px';
+            btnNo.style.top = y + 'px';
+        }
+
+        // Menampilkan kejutan utama dan memicu ledakan confetti hati
+        function showSurprise() {
+            document.getElementById('love-box').style.display = 'none';
+            document.getElementById('surprise-box').style.display = 'block';
+            
+            // Picu ledakan confetti dari bawah
+            startHeartConfetti();
+        }
+
+        /* --- SCRIPT CONFETTI EMOJI HATI --- */
+        const canvas = document.getElementById('confetti-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        const hearts = [];
+        const heartEmojis = ['❤️', '💖', '💝', '💕', '💗'];
+
+        class HeartParticle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                // Mulai dari bawah layar
+                this.y = canvas.height + Math.random() * 100; 
+                this.size = Math.random() * 20 + 20; // Ukuran font emoji
+                this.emoji = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
+                // Kecepatan ke atas (negatif karena koordinat Y canvas nol di atas)
+                this.speedY = -(Math.random() * 5 + 5); 
+                // Gerakan meliuk-liuk ke samping
+                this.speedX = Math.random() * 4 - 2; 
+                this.opacity = 1;
+                this.fadeSpeed = Math.random() * 0.005 + 0.002;
+            }
+
+            update() {
+                this.y += this.speedY;
+                this.x += this.speedX;
+                this.opacity -= this.fadeSpeed;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.opacity;
+                ctx.font = `${this.size}px Arial`;
+                ctx.fillText(this.emoji, this.x, this.y);
+                ctx.restore();
+            }
+        }
+
+        function startHeartConfetti() {
+            // Membuat 150 partikel hati sekaligus dari bawah
+            for (let i = 0; i < 150; i++) {
+                setTimeout(() => {
+                    hearts.push(new HeartParticle());
+                }, i * 10); // Efek semburan beruntun bergantian cepat
+            }
+            animate();
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            for (let i = 0; i < hearts.length; i++) {
+                hearts[i].update();
+                hearts[i].draw();
+                
+                // Hapus hati yang sudah tidak terlihat
+                if (hearts[i].opacity <= 0 || hearts[i].y < -50) {
+                    hearts.splice(i, 1);
+                    i--;
+                }
+            }
+            
+            if (hearts.length > 0) {
+                requestAnimationFrame(animate);
+            }
+        }
+    </script>
+</body>
+</html>
