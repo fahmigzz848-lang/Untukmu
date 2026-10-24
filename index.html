@@ -29,12 +29,14 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow-x: hidden;
+            overflow: hidden; /* Mencegah scrollbar muncul karena partikel */
+            position: relative;
         }
 
-        /* Desain Card Romantis */
+        /* Container Utama */
         .container {
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(5px); /* Efek kaca modern */
             padding: 2.5rem;
             border-radius: 20px;
             box-shadow: 0 10px 30px rgba(255, 77, 109, 0.1);
@@ -61,7 +63,7 @@
             color: #6c5a55;
         }
 
-        /* Gaya Tombol */
+        /* Tombol */
         .btn-container {
             display: flex;
             gap: 1rem;
@@ -87,7 +89,6 @@
             transform: translateY(-2px);
         }
 
-        /* Tombol 'Nggak' yang interaktif */
         #btn-no {
             background-color: #a8a29e;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
@@ -96,7 +97,7 @@
             background-color: #78716c;
         }
 
-        /* Section Konten Utama (Tersembunyi di awal) */
+        /* Halaman Kejutan */
         .main-content {
             display: none;
         }
@@ -115,7 +116,7 @@
             100% { transform: scale(1); }
         }
 
-        /* Canvas untuk Efek Confetti Hati */
+        /* Canvas Lapisan Efek */
         canvas {
             position: fixed;
             top: 0;
@@ -123,25 +124,29 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
-            z-index: 999;
         }
+        
+        #bg-canvas { z-index: 1; }       /* Di belakang kartu */
+        #confetti-canvas { z-index: 999; } /* Di paling depan */
     </style>
 </head>
 <body>
 
+    <!-- Canvas untuk Efek Latar Belakang & Konfeti -->
+    <canvas id="bg-canvas"></canvas>
     <canvas id="confetti-canvas"></canvas>
 
-    <!-- KONTEN 1: TEBAK-TEBAKAN PEMBUKA -->
+    <!-- TEBAK-TEBAKAN -->
     <div class="container" id="quiz-box">
         <h1>Tebak-tebakan Dulu Yuk! 💖</h1>
         <p id="quiz-question">Kopi apa yang paling manis di dunia?</p>
         <div class="btn-container">
-            <button onclick="checkAnswer(true)">Kopi Susu Caramel</button>
-            <button onclick="checkAnswer(false)">Kopi-nang kamu dengan bismillah</button>
+            <button onclick="checkAnswer()">Kopi Susu Caramel</button>
+            <button onclick="checkAnswer()">Kopi-nang kamu dengan bismillah</button>
         </div>
     </div>
 
-    <!-- KONTEN 2: PERTANYAAN INTI -->
+    <!-- PERTANYAAN INTI -->
     <div class="container" id="love-box" style="display: none;">
         <h1>Satu Pertanyaan Lagi... 🥺</h1>
         <p>Kamu tahu nggak kalau hari ini aku makin sayang banget sama kamu?</p>
@@ -151,7 +156,7 @@
         </div>
     </div>
 
-    <!-- KONTEN 3: HALAMAN UTAMA / KEJUTAN -->
+    <!-- HALAMAN UTAMA -->
     <div class="container main-content" id="surprise-box">
         <h1>I Love You! 💝</h1>
         <p>Terima kasih ya sudah hadir dan jadi orang paling spesial di hidupku. Halaman ini dibuat khusus karena aku mau kamu tahu kalau cintaku ke kamu itu luas banget!</p>
@@ -159,119 +164,128 @@
     </div>
 
     <script>
-        // Data sederhana untuk alur tebak-tebakan
         let quizStep = 1;
 
-        function checkAnswer(isWrong) {
+        function checkAnswer() {
             const questionElement = document.getElementById('quiz-question');
             const container = document.getElementById('quiz-box');
             
             if(quizStep === 1) {
-                // Mengubah ke tebakan kedua apa pun pilihan pertamanya (biar romantis)
                 questionElement.innerText = "Salah! Yang bener itu... Kopi-nang kau dengan bismillah. Hahaha! \n\nOke, tebakan satu lagi: Kucing apa yang paling cantik?";
-                container.querySelectorAll('button')[0].innerText = "Kucing Anggora";
-                container.querySelectorAll('button')[1].innerText = "Kucing-ta kau selamanya";
                 quizStep = 2;
             } else {
-                // Menuju ke pertanyaan inti
                 container.style.display = 'none';
                 document.getElementById('love-box').style.display = 'block';
             }
         }
 
-        // Membuat tombol 'Nggak' menghindar saat didekati/diklik
         function moveButton() {
             const btnNo = document.getElementById('btn-no');
-            // Menghitung posisi acak di dalam layar
             const x = Math.random() * (window.innerWidth - btnNo.offsetWidth - 50);
             const y = Math.random() * (window.innerHeight - btnNo.offsetHeight - 50);
-            
             btnNo.style.position = 'fixed';
             btnNo.style.left = x + 'px';
             btnNo.style.top = y + 'px';
         }
 
-        // Menampilkan kejutan utama dan memicu ledakan confetti hati
         function showSurprise() {
             document.getElementById('love-box').style.display = 'none';
             document.getElementById('surprise-box').style.display = 'block';
-            
-            // Picu ledakan confetti dari bawah
             startHeartConfetti();
         }
 
-        /* --- SCRIPT CONFETTI EMOJI HATI --- */
-        const canvas = document.getElementById('confetti-canvas');
-        const ctx = canvas.getContext('2d');
+        /* --- SETUP CANVAS --- */
+        const bgCanvas = document.getElementById('bg-canvas');
+        const bgCtx = bgCanvas.getContext('2d');
+        const cfCanvas = document.getElementById('confetti-canvas');
+        const cfCtx = cfCanvas.getContext('2d');
 
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+        function resizeCanvases() {
+            bgCanvas.width = window.innerWidth;
+            bgCanvas.height = window.innerHeight;
+            cfCanvas.width = window.innerWidth;
+            cfCanvas.height = window.innerHeight;
         }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+        window.addEventListener('resize', resizeCanvases);
+        resizeCanvases();
 
-        const hearts = [];
         const heartEmojis = ['❤️', '💖', '💝', '💕', '💗'];
 
-        class HeartParticle {
+        /* --- 1. EFEK BACKGROUND HATI MELAYANG --- */
+        const bgHearts = [];
+        
+        class FloatingHeart {
             constructor() {
-                this.x = Math.random() * canvas.width;
-                // Mulai dari bawah layar
-                this.y = canvas.height + Math.random() * 100; 
-                this.size = Math.random() * 20 + 20; // Ukuran font emoji
+                this.x = Math.random() * bgCanvas.width;
+                this.y = bgCanvas.height + Math.random() * 50;
+                this.size = Math.random() * 15 + 10; // Lebih kecil agar tidak mengganggu teks
                 this.emoji = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
-                // Kecepatan ke atas (negatif karena koordinat Y canvas nol di atas)
-                this.speedY = -(Math.random() * 5 + 5); 
-                // Gerakan meliuk-liuk ke samping
+                this.speedY = -(Math.random() * 1 + 0.5); // Gerakan lambat dan tenang
+                this.speedX = Math.sin(Math.random() * 2) * 0.5;
+                this.opacity = Math.random() * 0.4 + 0.2; // Transparan agar estetik
+            }
+            update() {
+                this.y += this.speedY;
+                this.x += this.speedX;
+            }
+            draw() {
+                bgCtx.save();
+                bgCtx.globalAlpha = this.opacity;
+                bgCtx.font = `${this.size}px Arial`;
+                bgCtx.fillText(this.emoji, this.x, this.y);
+                bgCtx.restore();
+            }
+        }
+
+        // Generate partikel background secara berkala
+        setInterval(() => {
+            if (bgHearts.length < 40) { // Batasi jumlah maksimal di layar
+                bgHearts.push(new FloatingHeart());
+            }
+        }, 600);
+
+        function animateBackground() {
+            bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+            for (let i = 0; i < bgHearts.length; i++) {
+                bgHearts[i].update();
+                bgHearts[i].draw();
+                if (bgHearts[i].y < -20) {
+                    bgHearts.splice(i, 1);
+                    i--;
+                }
+            }
+            requestAnimationFrame(animateBackground);
+        }
+        animateBackground();
+
+
+        /* --- 2. EFEK KONFETI LEDAKAN HATI --- */
+        const cfHearts = [];
+
+        class ConfettiHeart {
+            constructor() {
+                this.x = Math.random() * cfCanvas.width;
+                this.y = cfCanvas.height + Math.random() * 100; 
+                this.size = Math.random() * 20 + 20; 
+                this.emoji = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
+                this.speedY = -(Math.random() * 6 + 6); // Semburan cepat ke atas
                 this.speedX = Math.random() * 4 - 2; 
                 this.opacity = 1;
-                this.fadeSpeed = Math.random() * 0.005 + 0.002;
+                this.fadeSpeed = Math.random() * 0.005 + 0.003;
             }
-
             update() {
                 this.y += this.speedY;
                 this.x += this.speedX;
                 this.opacity -= this.fadeSpeed;
             }
-
             draw() {
-                ctx.save();
-                ctx.globalAlpha = this.opacity;
-                ctx.font = `${this.size}px Arial`;
-                ctx.fillText(this.emoji, this.x, this.y);
-                ctx.restore();
+                cfCtx.save();
+                cfCtx.globalAlpha = this.opacity;
+                cfCtx.font = `${
+                this.size}px Arial`;
+                cfCtx.fillText(this.emoji, this.x, this.y);
+                cfCtx.restore();
             }
         }
 
-        function startHeartConfetti() {
-            // Membuat 150 partikel hati sekaligus dari bawah
-            for (let i = 0; i < 150; i++) {
-                setTimeout(() => {
-                    hearts.push(new HeartParticle());
-                }, i * 10); // Efek semburan beruntun bergantian cepat
-            }
-            animate();
-        }
-
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            for (let i = 0; i < hearts.length; i++) {
-                hearts[i].update();
-                hearts[i].draw();
-                
-                // Hapus hati yang sudah tidak terlihat
-                if (hearts[i].opacity <= 0 || hearts[i].y < -50) {
-                    hearts.splice(i, 1);
-                    i--;
-                }
-            }
-            
-            if (hearts.length > 0) {
-                requestAnimationFrame(animate);
-            }
-        }
-    </script>
-</body>
-</html>
+        
